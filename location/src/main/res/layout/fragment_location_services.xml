@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/dimen_8dp"
+    tools:context=".view.LocationServicesFragment">
+
+    <TextView
+        android:id="@+id/btn_location_based_on_gps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/dimen_18sp"
+        android:padding="@dimen/dimen_4dp"
+        android:text="@string/location_based_on_gps" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen_1dp"
+        android:background="@android:color/darker_gray"/>
+
+    <TextView
+        android:id="@+id/btn_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/dimen_18sp"
+        android:padding="@dimen/dimen_4dp"
+        android:text="@string/location_based_on_search" />
+
+    <TextView
+        android:layout_marginTop="@dimen/dimen_8dp"
+        android:layout_marginBottom="@dimen/dimen_4dp"
+        android:padding="@dimen/dimen_4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/dimen_10sp"
+        android:text="@string/stored_locations"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/lst_stored_locations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

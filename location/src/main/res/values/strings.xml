@@ -1,0 +1,9 @@
+<resources>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="search_place">"Type place name "</string>
+    <string name="occurrences">Occurrences</string>
+    <string name="location_based_on_gps">Location based on GPS</string>
+    <string name="location_based_on_search">Search location</string>
+    <string name="stored_locations">Stored locations</string>
+</resources>
