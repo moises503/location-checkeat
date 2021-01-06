@@ -1,6 +1,7 @@
 package com.checkeat.location.util
 
 import android.content.Context
+import android.os.Parcel
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -72,3 +73,5 @@ fun Place.toLocation(): Location? {
         return null
     }
 }
+
+fun Parcel.readStringSafe(): String = readString().orEmpty()
