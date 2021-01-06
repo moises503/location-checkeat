@@ -8,7 +8,7 @@ import com.checkeat.location.databinding.PlaceFoundItemBinding
 import com.checkeat.location.lib.model.Location
 import com.checkeat.location.util.inflate
 
-class StoredLocationsAdapter(
+internal class StoredLocationsAdapter(
     private var locations: MutableList<Location> = mutableListOf(),
     private val locationSelected: (Location) -> Unit
 ) : RecyclerView.Adapter<StoredLocationsAdapter.StoredLocationViewHolder>() {
@@ -27,7 +27,7 @@ class StoredLocationsAdapter(
         notifyDataSetChanged()
     }
 
-    class StoredLocationViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    internal class StoredLocationViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val placeFoundItemBinding = PlaceFoundItemBinding.bind(view)
         fun bind(location: Location, locationSelected: (Location) -> Unit) = with(placeFoundItemBinding) {
             root.setOnClickListener {

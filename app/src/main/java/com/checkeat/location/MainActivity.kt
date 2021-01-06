@@ -15,9 +15,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun bindViews() {
         LocationLibrary.init(applicationContext)
-        val locationServices = LocationLibrary.locationServices {
+
+        val locationServices = LocationLibrary.locationServices(onLocationRetrieved = {
             Toast.makeText(this, it.address, Toast.LENGTH_LONG).show()
-        }
+        }, googleKey = "AIzaSyCpEJu45h811XXT13HqBoePWAmrJnhB64U")
 
         val locationProvider = LocationLibrary.locationProvider()
 

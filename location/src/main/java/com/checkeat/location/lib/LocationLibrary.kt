@@ -19,8 +19,11 @@ object LocationLibrary {
         }
     }
 
-    fun locationServices(onLocationRetrieved: (Location) -> Unit): LocationServicesFragment {
-        return LocationServicesFragment.newInstance(onLocationRetrieved)
+    fun locationServices(
+        onLocationRetrieved: (Location) -> Unit,
+        googleKey: String
+    ): LocationServicesFragment {
+        return LocationServicesFragment.newInstance(onLocationRetrieved, googleKey)
     }
 
     fun locationProvider(): LocationProvider {

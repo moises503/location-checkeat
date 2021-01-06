@@ -8,4 +8,5 @@
     <string name="stored_locations">Stored locations</string>
     <string name="location_general_error">Can not obtain location</string>
     <string name="location_notice">Currently we have location support from Android 6 devices</string>
+    <string name="place_found">%s - %s</string>
 </resources>
