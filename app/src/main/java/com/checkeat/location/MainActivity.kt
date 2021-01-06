@@ -2,7 +2,8 @@ package com.checkeat.location
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.checkeat.location.view.LocationServicesFragment
+import android.widget.Toast
+import com.checkeat.location.lib.LocationLibrary
 
 class MainActivity : AppCompatActivity() {
 
@@ -13,9 +14,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun bindViews() {
-        val locationServices = LocationServicesFragment.newInstance { locationRetrieved ->
-
+        LocationLibrary.init(applicationContext)
+        val locationServices = LocationLibrary.locationServices {
+            Toast.makeText(this, it.address, Toast.LENGTH_LONG).show()
         }
+
+        val locationProvider = LocationLibrary.locationProvider()
+
+        locationProvider.providesLastLocation(lastLocation = { location ->
+            location?.let {
+                Toast.makeText(this, it.address, Toast.LENGTH_LONG).show()
+            } ?: let {
+                Toast.makeText(this, "Location not found", Toast.LENGTH_LONG).show()
+            }
+        }, error = {
+            Toast.makeText(this, "An error occurred $it", Toast.LENGTH_LONG).show()
+        })
+
         supportFragmentManager.beginTransaction()
             .replace(R.id.lyt_container, locationServices)
             .commitAllowingStateLoss()

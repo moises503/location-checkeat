@@ -6,4 +6,6 @@
     <string name="location_based_on_gps">Location based on GPS</string>
     <string name="location_based_on_search">Search location</string>
     <string name="stored_locations">Stored locations</string>
+    <string name="location_general_error">Can not obtain location</string>
+    <string name="location_notice">Currently we have location support from Android 6 devices</string>
 </resources>
