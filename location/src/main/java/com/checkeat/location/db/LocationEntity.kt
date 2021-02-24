@@ -19,5 +19,7 @@ data class LocationEntity(
     @ColumnInfo(name = "city")
     val city: String,
     @ColumnInfo(name = "favorite")
-    var favorite: Boolean
+    var favorite: Boolean,
+    @ColumnInfo(name = "province")
+    var province: String
 )

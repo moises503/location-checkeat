@@ -11,7 +11,8 @@ data class Location(
     val city: String,
     val latitude: Double,
     val longitude: Double,
-    var favorite: Boolean = true
+    var favorite: Boolean = true,
+    var province: String
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -20,7 +21,8 @@ data class Location(
         parcel.readStringSafe(),
         parcel.readDouble(),
         parcel.readDouble(),
-        parcel.readByte() != 0.toByte()
+        parcel.readByte() != 0.toByte(),
+            parcel.readStringSafe()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -30,6 +32,7 @@ data class Location(
         parcel.writeDouble(latitude)
         parcel.writeDouble(longitude)
         parcel.writeByte(if (favorite) 1 else 0)
+        parcel.writeString(province)
     }
 
     override fun describeContents(): Int {
