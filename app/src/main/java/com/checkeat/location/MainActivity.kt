@@ -18,6 +18,8 @@ class MainActivity : AppCompatActivity() {
 
         val locationServices = LocationLibrary.locationServices(onLocationRetrieved = {
             Toast.makeText(this, it.address, Toast.LENGTH_LONG).show()
+        }, onProvidePermission = {
+            openSettings()
         }, googleKey = "AIzaSyCpEJu45h811XXT13HqBoePWAmrJnhB64U")
 
         val locationProvider = LocationLibrary.locationProvider()

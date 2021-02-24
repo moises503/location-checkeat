@@ -6,23 +6,30 @@ import com.checkeat.location.util.readStringSafe
 
 
 data class Location(
+    val id: Int,
     val address: String,
     val city: String,
     val latitude: Double,
-    val longitude: Double) : Parcelable {
+    val longitude: Double,
+    var favorite: Boolean = true
+) : Parcelable {
 
     constructor(parcel: Parcel) : this(
+        parcel.readInt(),
         parcel.readStringSafe(),
         parcel.readStringSafe(),
         parcel.readDouble(),
-        parcel.readDouble()
+        parcel.readDouble(),
+        parcel.readByte() != 0.toByte()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(id)
         parcel.writeString(address)
         parcel.writeString(city)
         parcel.writeDouble(latitude)
         parcel.writeDouble(longitude)
+        parcel.writeByte(if (favorite) 1 else 0)
     }
 
     override fun describeContents(): Int {
@@ -38,5 +45,4 @@ data class Location(
             return arrayOfNulls(size)
         }
     }
-
 }

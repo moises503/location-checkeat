@@ -9,6 +9,7 @@ internal interface LocationContract {
         suspend fun retrieveAllLocations() : List<Location>
         suspend fun retrieveLastLocation() : Location?
         suspend fun removeStoredLocations()
+        suspend fun updateLocation(location: Location)
     }
 
     interface Repository {
@@ -16,6 +17,7 @@ internal interface LocationContract {
         suspend fun retrieveAllLocations() : List<Location>
         suspend fun retrieveLastLocation() : Location?
         suspend fun removeStoredLocations()
+        suspend fun updateLocation(location: Location)
     }
 
     interface Provider {

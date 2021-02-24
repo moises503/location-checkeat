@@ -22,6 +22,7 @@ class GPSLocation(
         val geocoder = Geocoder(context, locale)
         val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
         return CheckEatLocation(
+            id = 0,
             address = addresses[0].getAddressLine(0),
             latitude = location.latitude,
             longitude = location.longitude,

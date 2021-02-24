@@ -2,12 +2,11 @@ package com.checkeat.location.framework.view
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context.LOCATION_SERVICE
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +19,7 @@ import com.checkeat.location.databinding.FragmentLocationServicesBinding
 import com.checkeat.location.framework.di.LocationKoinComponent
 import com.checkeat.location.framework.location.GPSLocation
 import com.checkeat.location.framework.view.adapter.PlacesFoundAdapter
+import com.checkeat.location.framework.view.adapter.SearchPlaceTextWatcher
 import com.checkeat.location.framework.view.adapter.StoredLocationsAdapter
 import com.checkeat.location.framework.viewmodel.LocationViewModel
 import com.checkeat.location.framework.viewmodel.LocationViewState
@@ -35,18 +35,20 @@ import com.google.android.libraries.places.api.net.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
+@RequiresApi(Build.VERSION_CODES.M)
 class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
     LocationKoinComponent {
 
     private var onLocationRetrieved: (Location) -> Unit = {}
+    private var onProvidePermission: () -> Unit = {}
     private var googleKey: String = ""
     private lateinit var locationServicesBinding: FragmentLocationServicesBinding
-    private lateinit var requestAccessFineLocation: PermissionRequester
     private val locationViewModel: LocationViewModel by viewModel()
     private lateinit var gpsLocation: GPSLocation
     private lateinit var locationManager: LocationManager
     private lateinit var storedLocationAdapter: StoredLocationsAdapter
     private lateinit var placesFoundAdapter: PlacesFoundAdapter
+    private lateinit var requestAccessFineLocation: PermissionRequester
 
     override fun bindFragmentView(inflater: LayoutInflater, container: ViewGroup?): View {
         locationServicesBinding =
@@ -71,6 +73,7 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
             locale = Locale.getDefault()
         )
         storedLocationAdapter = StoredLocationsAdapter(locationSelected = {
+            locationViewModel.updateLocation(it)
             onLocationRetrieved(it)
         })
         lstStoredLocations.apply {
@@ -79,11 +82,16 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
             adapter = storedLocationAdapter
         }
         locationViewModel.retrieveLocationList()
+        initPlacesClient()
         if (Build.VERSION.SDK_INT >= 23) {
             requestAccessFineLocation = PermissionRequester(requireActivity(),
-                ACCESS_FINE_LOCATION, onDenied = {}, onShowRationale = {})
-            requestAccessFineLocation.runWithPermission {
-                btnLocationBasedOnGps.setOnClickListener {
+                ACCESS_FINE_LOCATION, onDenied = {
+                    showPermissionRequestDialog()
+                }, onShowRationale = {
+                    showPermissionRequestDialog()
+                })
+            btnLocationBasedOnGps.setOnClickListener {
+                requestAccessFineLocation.runWithPermission {
                     locationManager.requestLocationUpdates(
                         LocationManager.GPS_PROVIDER,
                         MIN_TIME_IN_MILLIS,
@@ -91,7 +99,6 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
                         gpsLocation
                     )
                 }
-                initPlacesClient()
             }
         } else {
             requireContext().longToast(getString(R.string.location_notice))
@@ -132,6 +139,9 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
             }
             is LocationViewState.Error -> {
                 showError(getString(R.string.location_general_error))
+            }
+            is LocationViewState.LocationUpdated -> {
+                locationViewModel.retrieveLocationList()
             }
         }
     }
@@ -228,9 +238,11 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
     companion object {
         fun newInstance(
             onLocationRetrieved: (Location) -> Unit,
+            onProvidePermission: () -> Unit,
             googleKey: String
         ) =
             LocationServicesFragment().apply {
+                this.onProvidePermission = onProvidePermission
                 this.onLocationRetrieved = onLocationRetrieved
                 this.googleKey = googleKey
             }
@@ -239,9 +251,18 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
         const val MIN_DISTANCE = 5f
         const val TAG = "LocationServices"
     }
-}
 
-interface SearchPlaceTextWatcher : TextWatcher {
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-    override fun afterTextChanged(s: Editable?) = Unit
+    private fun showPermissionRequestDialog() {
+        AlertDialog.Builder(requireContext()).apply {
+            setTitle(getString(R.string.location_permission_required))
+            setMessage(getString(R.string.location_permission_message))
+            setPositiveButton(getString(R.string.location_permission_ok)) { dialog, _ ->
+                onProvidePermission()
+                dialog.dismiss()
+            }
+            setNegativeButton(getString(R.string.location_permission_cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+        }.show()
+    }
 }

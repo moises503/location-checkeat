@@ -21,9 +21,10 @@ object LocationLibrary {
 
     fun locationServices(
         onLocationRetrieved: (Location) -> Unit,
+        onProvidePermission: () -> Unit,
         googleKey: String
     ): LocationServicesFragment {
-        return LocationServicesFragment.newInstance(onLocationRetrieved, googleKey)
+        return LocationServicesFragment.newInstance(onLocationRetrieved, onProvidePermission, googleKey)
     }
 
     fun locationProvider(): LocationProvider {

@@ -1,9 +1,6 @@
 package com.checkeat.location.db
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 
 @Dao
 interface LocationDao {
@@ -13,9 +10,18 @@ interface LocationDao {
     @Query("SELECT * FROM latest_locations ORDER BY id DESC")
     suspend fun retrieveStoredLocations() : List<LocationEntity>
 
-    @Query("SELECT * FROM latest_locations ORDER BY id DESC LIMIT 1")
+    @Query("SELECT * FROM latest_locations ORDER BY favorite DESC LIMIT 1")
     suspend fun retrieveLastLocation() : LocationEntity?
+
+    @Query("SELECT * FROM latest_locations ORDER BY id DESC LIMIT 1")
+    suspend fun retrieveLastKnownLocation(): LocationEntity?
 
     @Query("DELETE FROM latest_locations")
     suspend fun removeStoredLocations()
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateAllStoreLocations(list: List<LocationEntity>)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateLocation(location: LocationEntity)
 }

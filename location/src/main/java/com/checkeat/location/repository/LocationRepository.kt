@@ -16,4 +16,7 @@ internal class LocationRepository(private val dataSource: LocationContract.DataS
 
     override suspend fun removeStoredLocations() =
         dataSource.removeStoredLocations()
+
+    override suspend fun updateLocation(location: Location) =
+        dataSource.updateLocation(location)
 }

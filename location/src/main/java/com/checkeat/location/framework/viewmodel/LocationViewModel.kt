@@ -26,6 +26,17 @@ internal class LocationViewModel(private val locationRepository: LocationContrac
         }
     }
 
+    fun updateLocation(location: Location) {
+        viewModelScope.launch {
+            val storeLocationResult = runCatching { locationRepository.updateLocation(location) }
+            storeLocationResult.onSuccess {
+                _locationViewState.postValue(ScreenState.Render(LocationViewState.LocationUpdated))
+            }.onFailure {
+                _locationViewState.postValue(ScreenState.Render(LocationViewState.Error(it.localizedMessage.orEmpty())))
+            }
+        }
+    }
+
     fun retrieveLocationList() {
         viewModelScope.launch {
             val allLocationsResult = runCatching { locationRepository.retrieveAllLocations() }
