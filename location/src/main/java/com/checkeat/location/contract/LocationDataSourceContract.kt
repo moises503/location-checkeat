@@ -22,6 +22,7 @@ internal interface LocationContract {
 
     interface Provider {
         fun providesLastLocation(lastLocation: (Location?) -> Unit, error: (String) -> Unit)
+        fun providesSuspendLastLocation(lastLocation: suspend (Location?) -> Unit)
         fun removeStoredLocations(success: () -> Unit, error: (String) -> Unit)
         fun destroyProvider()
     }

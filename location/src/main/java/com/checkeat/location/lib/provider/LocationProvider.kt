@@ -4,6 +4,7 @@ import com.checkeat.location.contract.LocationContract
 import com.checkeat.location.framework.di.LocationKoinComponent
 import com.checkeat.location.lib.model.Location
 import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import org.koin.core.inject
 import kotlin.coroutines.CoroutineContext
@@ -39,6 +40,12 @@ class LocationProvider : LocationContract.Provider, CoroutineScope, LocationKoin
             }.onFailure {
                 error(it.localizedMessage.orEmpty())
             }
+        }
+    }
+
+    override fun providesSuspendLastLocation(lastLocation: suspend (Location?) -> Unit) {
+        GlobalScope.launch(IO) {
+            lastLocation(locationRepository.retrieveLastLocation())
         }
     }
 
