@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.checkeat.location.R
 import com.checkeat.location.databinding.PlaceFoundItemBinding
+import com.checkeat.location.util.gone
 import com.checkeat.location.util.inflate
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 
@@ -38,6 +39,7 @@ internal class PlacesFoundAdapter(
             root.setOnClickListener {
                 onPredictionClicked(prediction)
             }
+            imgFavorite.gone()
             txtPlaceFound.text = String.format(
                 txtPlaceFound.context.getString(R.string.place_found),
                 prediction.getPrimaryText(null), prediction.getSecondaryText(null)
