@@ -43,10 +43,8 @@ class LocationProvider : LocationContract.Provider, CoroutineScope, LocationKoin
         }
     }
 
-    override fun providesSuspendLastLocation(lastLocation: suspend (Location?) -> Unit) {
-        GlobalScope.launch(IO) {
-            lastLocation(locationRepository.retrieveLastLocation())
-        }
+    override suspend fun providesSuspendLastLocation(): Location? {
+        return locationRepository.retrieveLastLocation()
     }
 
     override fun destroyProvider() = job.cancelChildren()
