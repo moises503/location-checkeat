@@ -187,8 +187,7 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
                     txtOccurrences.visible()
                     val request =
                         FindAutocompletePredictionsRequest.builder()
-                            .setCountry("mx")
-                            .setTypeFilter(TypeFilter.ADDRESS)
+                            .setCountry("MX")
                             .setSessionToken(token)
                             .setQuery(s.toString())
                             .build()
