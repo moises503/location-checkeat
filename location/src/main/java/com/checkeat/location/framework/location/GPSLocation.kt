@@ -10,21 +10,24 @@ import java.util.*
 typealias CheckEatLocation = com.checkeat.location.lib.model.Location
 
 class GPSLocation(
-        private val locationRetrieved: (CheckEatLocation) -> Unit,
-        private val context: Context,
-        private val locale: Locale
+    private val locationRetrieved: (CheckEatLocation?) -> Unit,
+    private val context: Context,
+    private val locale: Locale
 ) : LocationListener {
 
     override fun onLocationChanged(location: Location) {
         locationRetrieved(retrieveLocation(location))
     }
 
-    private fun retrieveLocation(location: Location): CheckEatLocation {
+    override fun onProviderDisabled(provider: String) = Unit
+
+    override fun onProviderEnabled(provider: String) = Unit
+
+    private fun retrieveLocation(location: Location): CheckEatLocation? {
         val geocoder = Geocoder(context, locale)
         val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-
-        if (addresses.size != 0) {
-            return CheckEatLocation(
+        return if (addresses.isNotEmpty()) {
+            CheckEatLocation(
                 id = 0,
                 address = addresses[0].getAddressLine(0),
                 latitude = location.latitude,
@@ -33,14 +36,7 @@ class GPSLocation(
                 province = addresses[0].adminArea
             )
         } else {
-            return CheckEatLocation(
-                id = 0,
-                address = "null",
-                latitude = 0.000000000000000,
-                longitude = 0.000000000000000,
-                city = "null",
-                province = "null"
-            )
+            null
         }
     }
 }

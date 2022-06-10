@@ -15,15 +15,17 @@ internal class LocationViewModel(private val locationRepository: LocationContrac
     val locationViewState: LiveData<ScreenState<LocationViewState>>
         get() = _locationViewState
 
-    fun storeLocation(location: Location) {
-        viewModelScope.launch {
-            val storeLocationResult = runCatching { locationRepository.storeLocation(location) }
-            storeLocationResult.onSuccess {
-                _locationViewState.postValue(ScreenState.Render(LocationViewState.LocationStored(location)))
-            }.onFailure {
-                _locationViewState.postValue(ScreenState.Render(LocationViewState.Error(it.localizedMessage.orEmpty())))
+    fun storeLocation(location: Location?) {
+        location?.let { safeLocation ->
+            viewModelScope.launch {
+                val storeLocationResult = runCatching { locationRepository.storeLocation(location) }
+                storeLocationResult.onSuccess {
+                    _locationViewState.postValue(ScreenState.Render(LocationViewState.LocationStored(safeLocation)))
+                }.onFailure {
+                    _locationViewState.postValue(ScreenState.Render(LocationViewState.Error(it.localizedMessage.orEmpty())))
+                }
             }
-        }
+        } ?: _locationViewState.postValue(ScreenState.Render(LocationViewState.Error("")))
     }
 
     fun updateLocation(location: Location) {
