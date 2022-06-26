@@ -67,6 +67,7 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
         locationManager = requireActivity().getSystemService(LOCATION_SERVICE) as LocationManager
         gpsLocation = GPSLocation(
             locationRetrieved = {
+                locationManager.removeUpdates(gpsLocation)
                 locationViewModel.storeLocation(it)
             },
             context = requireContext(),
@@ -120,12 +121,6 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
 
     override fun showError(message: String) {
         requireContext().longToast(message)
-    }
-
-    @SuppressLint("MissingPermission")
-    override fun onDestroy() {
-        super.onDestroy()
-        locationManager.removeUpdates(gpsLocation)
     }
 
     private fun renderLocations(locationViewState: LocationViewState) {

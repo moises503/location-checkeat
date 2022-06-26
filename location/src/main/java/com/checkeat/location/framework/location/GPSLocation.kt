@@ -4,7 +4,6 @@ import android.content.Context
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
-import android.util.Log
 import java.util.*
 
 typealias CheckEatLocation = com.checkeat.location.lib.model.Location
