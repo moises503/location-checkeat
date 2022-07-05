@@ -12,15 +12,24 @@ import kotlinx.coroutines.launch
 internal class LocationViewModel(private val locationRepository: LocationContract.Repository) :
     ViewModel() {
     private val _locationViewState = MutableLiveData<ScreenState<LocationViewState>>()
+    private val _locationStatusViewState = MutableLiveData<LocationStatusViewState>()
     val locationViewState: LiveData<ScreenState<LocationViewState>>
         get() = _locationViewState
+    val locationStatusViewState: LiveData<LocationStatusViewState>
+        get() = _locationStatusViewState
 
     fun storeLocation(location: Location?) {
         location?.let { safeLocation ->
             viewModelScope.launch {
                 val storeLocationResult = runCatching { locationRepository.storeLocation(location) }
                 storeLocationResult.onSuccess {
-                    _locationViewState.postValue(ScreenState.Render(LocationViewState.LocationStored(safeLocation)))
+                    _locationViewState.postValue(
+                        ScreenState.Render(
+                            LocationViewState.LocationStored(
+                                safeLocation
+                            )
+                        )
+                    )
                 }.onFailure {
                     _locationViewState.postValue(ScreenState.Render(LocationViewState.Error(it.localizedMessage.orEmpty())))
                 }
@@ -47,6 +56,14 @@ internal class LocationViewModel(private val locationRepository: LocationContrac
             }.onFailure {
                 _locationViewState.postValue(ScreenState.Render(LocationViewState.Error(it.localizedMessage.orEmpty())))
             }
+        }
+    }
+
+    fun isLocationEnabled(isEnabled: Boolean) {
+        if (isEnabled) {
+            _locationStatusViewState.postValue(LocationStatusViewState.Enabled)
+        } else {
+            _locationStatusViewState.postValue(LocationStatusViewState.Disabled)
         }
     }
 }
