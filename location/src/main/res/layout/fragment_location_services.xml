@@ -8,28 +8,30 @@
     tools:context=".framework.view.LocationServicesFragment">
 
     <TextView
-        android:id="@+id/btn_location_based_on_gps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/dimen_18sp"
         android:layout_margin="@dimen/dimen_4dp"
-        android:padding="@dimen/dimen_2dp"
-        android:text="@string/location_based_on_gps" />
+        android:text="@string/discover_our_restaurants"
+        android:textSize="@dimen/dimen_18sp"
+        android:textStyle="bold" />
 
-    <View
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dimen_1dp"
-        android:layout_marginLeft="@dimen/dimen_8dp"
-        android:layout_marginRight="@dimen/dimen_8dp"
-        android:background="@android:color/darker_gray"/>
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dimen_4dp"
+        android:text="@string/discover_our_restaurants_message"
+        android:textSize="@dimen/dimen_14sp" />
 
     <EditText
         android:id="@+id/edt_search_place"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/dimen_18sp"
-        android:layout_margin="@dimen/dimen_4dp"
-        android:hint="@string/location_based_on_search" />
+        android:layout_marginStart="@dimen/dimen_4dp"
+        android:layout_marginTop="@dimen/dimen_4dp"
+        android:layout_marginEnd="@dimen/dimen_4dp"
+        android:layout_marginBottom="@dimen/dimen_12dp"
+        android:hint="@string/location_based_on_search"
+        android:textSize="@dimen/dimen_18sp" />
 
     <TextView
         android:id="@+id/txt_occurrences"
@@ -38,26 +40,41 @@
         android:layout_marginTop="@dimen/dimen_2dp"
         android:layout_marginBottom="@dimen/dimen_8dp"
         android:text="@string/occurrences"
-        android:visibility="gone"
-        />
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lst_places_found"
-        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
     <TextView
+        android:id="@+id/btn_location_based_on_gps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dimen_4dp"
+        android:padding="@dimen/dimen_2dp"
+        android:text="@string/location_based_on_gps"
+        android:textSize="@dimen/dimen_18sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen_1dp"
+        android:layout_marginLeft="@dimen/dimen_8dp"
+        android:layout_marginRight="@dimen/dimen_8dp"
+        android:background="@android:color/darker_gray" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dimen_8dp"
         android:layout_marginBottom="@dimen/dimen_4dp"
         android:padding="@dimen/dimen_4dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/dimen_10sp"
-        android:text="@string/stored_locations"/>
+        android:text="@string/stored_locations"
+        android:textSize="@dimen/dimen_10sp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lst_stored_locations"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 </LinearLayout>

@@ -1,6 +1,4 @@
 <resources>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="search_place">"Type place name "</string>
     <string name="occurrences">Occurrences</string>
     <string name="location_based_on_gps">Location based on GPS</string>
@@ -13,4 +11,6 @@
     <string name="location_permission_message">Location permission it is necessary for seaching places</string>
     <string name="location_permission_ok">Provides permission</string>
     <string name="location_permission_cancel">Cancel</string>
+    <string name="discover_our_restaurants">Discover our restaurants</string>
+    <string name="discover_our_restaurants_message">You cand find our sponsors typing out their names or using your location</string>
 </resources>

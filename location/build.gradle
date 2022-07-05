@@ -12,8 +12,8 @@ android {
     defaultConfig {
         minSdkVersion 22
         targetSdkVersion 30
-        versionCode 17
-        versionName "1.7"
+        versionCode 1120
+        versionName "1.12"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -67,6 +67,7 @@ dependencies {
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
     api 'androidx.room:room-runtime:2.2.6'
     api 'org.koin:koin-androidx-viewmodel:2.0.1'
+    api "com.google.android.gms:play-services-location:20.0.0"
     api 'androidx.constraintlayout:constraintlayout:2.0.4'
     kapt 'androidx.room:room-compiler:2.2.6'
     api 'androidx.room:room-ktx:2.2.6'
