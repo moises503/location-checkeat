@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Location</string>
+    <string name="disclaimer_title">We need your location</string>
+    <string name="disclaimer_description">To obtain your current location, we would need your location</string>
+    <string name="continue_text">Continue</string>
+    <string name="cancel">Don\'t agree</string>
 </resources>

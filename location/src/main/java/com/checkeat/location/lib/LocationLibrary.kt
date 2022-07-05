@@ -3,6 +3,7 @@ package com.checkeat.location.lib
 import android.content.Context
 import com.checkeat.location.framework.di.coreModule
 import com.checkeat.location.framework.di.locationModule
+import com.checkeat.location.framework.view.LocationDisclaimerCallbackContract
 import com.checkeat.location.lib.model.Location
 import com.checkeat.location.lib.provider.LocationProvider
 import com.checkeat.location.framework.view.LocationServicesFragment
@@ -22,9 +23,10 @@ object LocationLibrary {
     fun locationServices(
         onLocationRetrieved: (Location) -> Unit,
         onProvidePermission: () -> Unit,
+        onAgreementCalled: (LocationDisclaimerCallbackContract) -> Unit = {},
         googleKey: String
     ): LocationServicesFragment {
-        return LocationServicesFragment.newInstance(onLocationRetrieved, onProvidePermission, googleKey)
+        return LocationServicesFragment.newInstance(onLocationRetrieved, onProvidePermission, onAgreementCalled, googleKey)
     }
 
     fun locationProvider(): LocationProvider {

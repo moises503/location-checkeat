@@ -3,8 +3,6 @@ package com.checkeat.location.framework.view
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Context.LOCATION_SERVICE
-import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -17,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.checkeat.location.R
 import com.checkeat.location.databinding.FragmentLocationServicesBinding
 import com.checkeat.location.framework.di.LocationKoinComponent
-import com.checkeat.location.framework.location.GPSLocation
+import com.checkeat.location.framework.location.GeocoderConverter
 import com.checkeat.location.framework.view.adapter.PlacesFoundAdapter
 import com.checkeat.location.framework.view.adapter.SearchPlaceTextWatcher
 import com.checkeat.location.framework.view.adapter.StoredLocationsAdapter
@@ -26,29 +24,32 @@ import com.checkeat.location.framework.viewmodel.LocationViewState
 import com.checkeat.location.lib.model.Location
 import com.checkeat.location.util.*
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.M)
 class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
-    LocationKoinComponent {
+    LocationKoinComponent, LocationDisclaimerCallbackContract {
 
     private var onLocationRetrieved: (Location) -> Unit = {}
     private var onProvidePermission: () -> Unit = {}
+    private var onAgreementCalled: (LocationDisclaimerCallbackContract) -> Unit = {}
     private var googleKey: String = ""
     private lateinit var locationServicesBinding: FragmentLocationServicesBinding
     private val locationViewModel: LocationViewModel by viewModel()
-    private lateinit var gpsLocation: GPSLocation
-    private lateinit var locationManager: LocationManager
     private lateinit var storedLocationAdapter: StoredLocationsAdapter
     private lateinit var placesFoundAdapter: PlacesFoundAdapter
     private lateinit var requestAccessFineLocation: PermissionRequester
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun bindFragmentView(inflater: LayoutInflater, container: ViewGroup?): View {
         locationServicesBinding =
@@ -62,17 +63,9 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
         bindViews()
     }
 
-    @SuppressLint("MissingPermission")
     override fun bindViews() = with(locationServicesBinding) {
-        locationManager = requireActivity().getSystemService(LOCATION_SERVICE) as LocationManager
-        gpsLocation = GPSLocation(
-            locationRetrieved = {
-                locationManager.removeUpdates(gpsLocation)
-                locationViewModel.storeLocation(it)
-            },
-            context = requireContext(),
-            locale = Locale.getDefault()
-        )
+        edtSearchPlace.requestFocus()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         storedLocationAdapter = StoredLocationsAdapter(locationSelected = {
             locationViewModel.updateLocation(it)
             onLocationRetrieved(it)
@@ -92,14 +85,7 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
                     showPermissionRequestDialog()
                 })
             btnLocationBasedOnGps.setOnClickListener {
-                requestAccessFineLocation.runWithPermission {
-                    locationManager.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER,
-                        MIN_TIME_IN_MILLIS,
-                        MIN_DISTANCE,
-                        gpsLocation
-                    )
-                }
+                onAgreementCalled(this@LocationServicesFragment)
             }
         } else {
             requireContext().longToast(getString(R.string.location_notice))
@@ -233,11 +219,13 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
         fun newInstance(
             onLocationRetrieved: (Location) -> Unit,
             onProvidePermission: () -> Unit,
+            onAgreementCalled: (LocationDisclaimerCallbackContract) -> Unit = {},
             googleKey: String
         ) =
             LocationServicesFragment().apply {
                 this.onProvidePermission = onProvidePermission
                 this.onLocationRetrieved = onLocationRetrieved
+                this.onAgreementCalled = onAgreementCalled
                 this.googleKey = googleKey
             }
 
@@ -258,5 +246,26 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
                 dialog.dismiss()
             }
         }.show()
+    }
+
+    @SuppressLint("MissingPermission")
+    override fun onAgreementAccepted() {
+        requestAccessFineLocation.runWithPermission {
+            val priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY
+            val cancellationTokenSource = CancellationTokenSource()
+            fusedLocationClient.getCurrentLocation(priority, cancellationTokenSource.token)
+                .addOnSuccessListener { location ->
+                    locationViewModel.storeLocation(
+                        GeocoderConverter.toCheckEatLocation(
+                            requireContext(),
+                            Locale.getDefault(),
+                            location
+                        )
+                    )
+                }
+                .addOnFailureListener { _ ->
+                    locationViewModel.storeLocation(null)
+                }
+        }
     }
 }
