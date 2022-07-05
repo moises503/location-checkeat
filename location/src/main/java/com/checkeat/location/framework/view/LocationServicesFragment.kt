@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.checkeat.location.R
@@ -19,6 +20,7 @@ import com.checkeat.location.framework.location.GeocoderConverter
 import com.checkeat.location.framework.view.adapter.PlacesFoundAdapter
 import com.checkeat.location.framework.view.adapter.SearchPlaceTextWatcher
 import com.checkeat.location.framework.view.adapter.StoredLocationsAdapter
+import com.checkeat.location.framework.viewmodel.LocationStatusViewState
 import com.checkeat.location.framework.viewmodel.LocationViewModel
 import com.checkeat.location.framework.viewmodel.LocationViewState
 import com.checkeat.location.lib.model.Location
@@ -64,7 +66,7 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
     }
 
     override fun bindViews() = with(locationServicesBinding) {
-        edtSearchPlace.requestFocus()
+        locationViewModel.isLocationEnabled(arguments?.getBoolean(LOCATION_ENABLED, false) ?: false)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         storedLocationAdapter = StoredLocationsAdapter(locationSelected = {
             locationViewModel.updateLocation(it)
@@ -96,6 +98,9 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
         locationViewModel.locationViewState.observe(viewLifecycleOwner, Observer {
             renderScreenState(it)
         })
+        locationViewModel.locationStatusViewState.observe(viewLifecycleOwner, Observer {
+            renderLocationStatus(it)
+        })
     }
 
     override fun renderScreenState(screenState: ScreenState<LocationViewState>) {
@@ -107,6 +112,20 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
 
     override fun showError(message: String) {
         requireContext().longToast(message)
+    }
+
+    private fun renderLocationStatus(locationStatusViewState: LocationStatusViewState) {
+        with(locationServicesBinding) {
+            when(locationStatusViewState) {
+                is LocationStatusViewState.Enabled -> {
+                    btnLocationBasedOnGps.text = getString(R.string.location_based_on_gps)
+                }
+                is LocationStatusViewState.Disabled -> {
+                    edtSearchPlace.requestFocus()
+                    btnLocationBasedOnGps.text = getString(R.string.enable_my_location)
+                }
+            }
+        }
     }
 
     private fun renderLocations(locationViewState: LocationViewState) {
@@ -220,6 +239,7 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
             onLocationRetrieved: (Location) -> Unit,
             onProvidePermission: () -> Unit,
             onAgreementCalled: (LocationDisclaimerCallbackContract) -> Unit = {},
+            locationEnabled: Boolean = false,
             googleKey: String
         ) =
             LocationServicesFragment().apply {
@@ -227,11 +247,13 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
                 this.onLocationRetrieved = onLocationRetrieved
                 this.onAgreementCalled = onAgreementCalled
                 this.googleKey = googleKey
+                arguments = bundleOf(LOCATION_ENABLED to locationEnabled)
             }
 
         const val MIN_TIME_IN_MILLIS = 5000L
         const val MIN_DISTANCE = 5f
         const val TAG = "LocationServices"
+        private const val LOCATION_ENABLED = "LOCATION_ENABLED"
     }
 
     private fun showPermissionRequestDialog() {

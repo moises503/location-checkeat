@@ -24,9 +24,10 @@ object LocationLibrary {
         onLocationRetrieved: (Location) -> Unit,
         onProvidePermission: () -> Unit,
         onAgreementCalled: (LocationDisclaimerCallbackContract) -> Unit = {},
+        locationEnabled: Boolean = false,
         googleKey: String
     ): LocationServicesFragment {
-        return LocationServicesFragment.newInstance(onLocationRetrieved, onProvidePermission, onAgreementCalled, googleKey)
+        return LocationServicesFragment.newInstance(onLocationRetrieved, onProvidePermission, onAgreementCalled, locationEnabled, googleKey)
     }
 
     fun locationProvider(): LocationProvider {
