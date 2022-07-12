@@ -1,2 +1,7 @@
 jdk:
   - openjdk11
+install:
+  - echo "Cleaning and building files"
+  - ./gradlew clean assemble
+  - echo "Publishing"
+  - ./gradlew publishToMavenLocal
