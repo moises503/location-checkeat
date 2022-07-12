@@ -7,11 +7,11 @@ android {
     compileSdkVersion 31
 
     defaultConfig {
-        applicationId "com.checkeat.location"
-        minSdkVersion 22
+        applicationId "com.checkeat.sample"
+        minSdkVersion 23
         versionCode 104
         versionName "1.0.4"
-
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

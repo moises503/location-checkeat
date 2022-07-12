@@ -1,4 +1,4 @@
-package com.checkeat.location
+package com.checkeat.sample
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
