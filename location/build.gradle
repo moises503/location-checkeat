@@ -37,8 +37,8 @@ android {
 }
 
 ext {
-    versionCode = 1150
-    versionName = '1.15'
+    versionCode = 1160
+    versionName = '1.16'
 }
 
 publishing {
