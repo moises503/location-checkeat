@@ -10,10 +10,10 @@ android {
     compileSdkVersion 31
 
     defaultConfig {
-        minSdkVersion 22
-        versionCode 1140
-        versionName "1.14"
-
+        minSdkVersion 23
+        versionCode versionCode
+        versionName versionName
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -36,11 +36,16 @@ android {
     }
 }
 
+ext {
+    versionCode = 1150
+    versionName = '1.15'
+}
+
 publishing {
     publications {
         locationPublication(MavenPublication) {
             groupId 'com.checkeatmx.location'
-            version '1.0'
+            version "$versionName"
             artifactId 'location'
             artifact("$buildDir/outputs/aar/location-release.aar")
         }

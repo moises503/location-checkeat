@@ -1,4 +1,4 @@
-package com.checkeat.location
+package com.checkeat.sample
 
 import android.content.Context
 import com.checkeat.location.lib.model.LocationState

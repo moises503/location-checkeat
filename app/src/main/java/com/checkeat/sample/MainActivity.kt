@@ -1,4 +1,4 @@
-package com.checkeat.location
+package com.checkeat.sample
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -6,7 +6,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.checkeat.location.framework.view.LocationDisclaimerCallbackContract
 import com.checkeat.location.lib.LocationLibrary
-import kotlinx.coroutines.NonCancellable.cancel
 
 class MainActivity : AppCompatActivity() {
 

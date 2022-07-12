@@ -1,4 +1,4 @@
-package com.checkeat.location
+package com.checkeat.sample
 
 import org.junit.Test
 
