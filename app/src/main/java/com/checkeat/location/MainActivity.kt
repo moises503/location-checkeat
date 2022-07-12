@@ -10,6 +10,8 @@ import kotlinx.coroutines.NonCancellable.cancel
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var sessionPreferences: SessionPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -18,14 +20,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun bindViews() {
         LocationLibrary.init(applicationContext)
-
-        val locationServices = LocationLibrary.locationServices(onLocationRetrieved = {
-            Toast.makeText(this, it.address, Toast.LENGTH_LONG).show()
-        }, onAgreementCalled = { disclaimerCallback ->
-            showPopupMessage(disclaimerCallback)
-        }, onProvidePermission = {
-            openSettings()
-        }, googleKey = "AIzaSyCpEJu45h811XXT13HqBoePWAmrJnhB64U")
+        sessionPreferences = SessionPreferencesImpl(applicationContext)
+        val locationServices =
+            LocationLibrary.locationServices(onLocationRetrieved = { location, state ->
+                Toast.makeText(this, location.address, Toast.LENGTH_LONG).show()
+                sessionPreferences.saveCurrentLocationState(state)
+            }, onAgreementCalled = { disclaimerCallback ->
+                showPopupMessage(disclaimerCallback)
+            }, locationState = sessionPreferences.getCurrentLocationState(),
+                onProvidePermission = {
+                    openSettings()
+                }, googleKey = "AIzaSyCpEJu45h811XXT13HqBoePWAmrJnhB64U"
+            )
 
         val locationProvider = LocationLibrary.locationProvider()
 
@@ -50,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         dialog.setMessage(getString(R.string.disclaimer_description))
         dialog.setCancelable(false)
         dialog.setPositiveButton(getString(R.string.continue_text)) { dialogView, _ ->
+            sessionPreferences.userHasAcceptedLocationPermissions()
             callback.onAgreementAccepted()
             dialogView.dismiss()
         }

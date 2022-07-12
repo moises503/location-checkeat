@@ -24,6 +24,7 @@ import com.checkeat.location.framework.viewmodel.LocationStatusViewState
 import com.checkeat.location.framework.viewmodel.LocationViewModel
 import com.checkeat.location.framework.viewmodel.LocationViewState
 import com.checkeat.location.lib.model.Location
+import com.checkeat.location.lib.model.LocationState
 import com.checkeat.location.util.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -42,7 +43,7 @@ import java.util.*
 class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
     LocationKoinComponent, LocationDisclaimerCallbackContract {
 
-    private var onLocationRetrieved: (Location) -> Unit = {}
+    private var onLocationRetrieved: (Location, LocationState) -> Unit = { _, _ -> }
     private var onProvidePermission: () -> Unit = {}
     private var onAgreementCalled: (LocationDisclaimerCallbackContract) -> Unit = {}
     private var googleKey: String = ""
@@ -66,11 +67,13 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
     }
 
     override fun bindViews() = with(locationServicesBinding) {
-        locationViewModel.isLocationEnabled(arguments?.getBoolean(LOCATION_ENABLED, false) ?: false)
+        locationViewModel.checkLocationStatus(
+            arguments?.getParcelable(LOCATION_STATE) ?: LocationState.DISABLED
+        )
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         storedLocationAdapter = StoredLocationsAdapter(locationSelected = {
             locationViewModel.updateLocation(it)
-            onLocationRetrieved(it)
+            onLocationRetrieved(it, LocationState.CLICKED)
         })
         lstStoredLocations.apply {
             layoutManager =
@@ -86,9 +89,6 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
                 }, onShowRationale = {
                     showPermissionRequestDialog()
                 })
-            btnLocationBasedOnGps.setOnClickListener {
-                onAgreementCalled(this@LocationServicesFragment)
-            }
         } else {
             requireContext().longToast(getString(R.string.location_notice))
         }
@@ -116,13 +116,25 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
 
     private fun renderLocationStatus(locationStatusViewState: LocationStatusViewState) {
         with(locationServicesBinding) {
-            when(locationStatusViewState) {
-                is LocationStatusViewState.Enabled -> {
+            when (locationStatusViewState) {
+                is LocationStatusViewState.SearchLocation -> {
+                    btnLocationBasedOnGps.text = getString(R.string.enable_my_location)
+                    btnLocationBasedOnGps.setOnClickListener {
+                        onAgreementCalled(this@LocationServicesFragment)
+                    }
+                }
+                is LocationStatusViewState.GetLocation -> {
                     btnLocationBasedOnGps.text = getString(R.string.location_based_on_gps)
+                    btnLocationBasedOnGps.setOnClickListener {
+                        onAgreementAccepted()
+                    }
                 }
                 is LocationStatusViewState.Disabled -> {
                     edtSearchPlace.requestFocus()
                     btnLocationBasedOnGps.text = getString(R.string.enable_my_location)
+                    btnLocationBasedOnGps.setOnClickListener {
+                        onAgreementCalled(this@LocationServicesFragment)
+                    }
                 }
             }
         }
@@ -131,7 +143,7 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
     private fun renderLocations(locationViewState: LocationViewState) {
         when (locationViewState) {
             is LocationViewState.LocationStored -> {
-                onLocationRetrieved(locationViewState.location)
+                onLocationRetrieved(locationViewState.location, locationViewState.state)
                 locationViewModel.retrieveLocationList()
             }
             is LocationViewState.Locations -> {
@@ -230,16 +242,16 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
 
     private fun saveAddress(place: Place) {
         place.toLocation()?.let {
-            locationViewModel.storeLocation(it)
+            locationViewModel.storeLocation(it, LocationState.SEARCH_LOCATION)
         }
     }
 
     companion object {
         fun newInstance(
-            onLocationRetrieved: (Location) -> Unit,
+            onLocationRetrieved: (Location, LocationState) -> Unit,
             onProvidePermission: () -> Unit,
             onAgreementCalled: (LocationDisclaimerCallbackContract) -> Unit = {},
-            locationEnabled: Boolean = false,
+            locationState: LocationState = LocationState.DISABLED,
             googleKey: String
         ) =
             LocationServicesFragment().apply {
@@ -247,13 +259,11 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
                 this.onLocationRetrieved = onLocationRetrieved
                 this.onAgreementCalled = onAgreementCalled
                 this.googleKey = googleKey
-                arguments = bundleOf(LOCATION_ENABLED to locationEnabled)
+                arguments = bundleOf(LOCATION_STATE to locationState)
             }
 
-        const val MIN_TIME_IN_MILLIS = 5000L
-        const val MIN_DISTANCE = 5f
         const val TAG = "LocationServices"
-        private const val LOCATION_ENABLED = "LOCATION_ENABLED"
+        private const val LOCATION_STATE = "LOCATION_STATE"
     }
 
     private fun showPermissionRequestDialog() {
@@ -282,11 +292,12 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
                             requireContext(),
                             Locale.getDefault(),
                             location
-                        )
+                        ),
+                        LocationState.GET_LOCATION
                     )
                 }
                 .addOnFailureListener { _ ->
-                    locationViewModel.storeLocation(null)
+                    locationViewModel.storeLocation(null, LocationState.DISABLED)
                 }
         }
     }
