@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.checkeat.location.contract.LocationContract
 import com.checkeat.location.lib.model.Location
+import com.checkeat.location.lib.model.LocationState
 import com.checkeat.location.util.ScreenState
 import kotlinx.coroutines.launch
 
@@ -18,7 +19,7 @@ internal class LocationViewModel(private val locationRepository: LocationContrac
     val locationStatusViewState: LiveData<LocationStatusViewState>
         get() = _locationStatusViewState
 
-    fun storeLocation(location: Location?) {
+    fun storeLocation(location: Location?, locationState: LocationState) {
         location?.let { safeLocation ->
             viewModelScope.launch {
                 val storeLocationResult = runCatching { locationRepository.storeLocation(location) }
@@ -26,7 +27,8 @@ internal class LocationViewModel(private val locationRepository: LocationContrac
                     _locationViewState.postValue(
                         ScreenState.Render(
                             LocationViewState.LocationStored(
-                                safeLocation
+                                safeLocation,
+                                locationState
                             )
                         )
                     )
@@ -59,11 +61,12 @@ internal class LocationViewModel(private val locationRepository: LocationContrac
         }
     }
 
-    fun isLocationEnabled(isEnabled: Boolean) {
-        if (isEnabled) {
-            _locationStatusViewState.postValue(LocationStatusViewState.Enabled)
-        } else {
-            _locationStatusViewState.postValue(LocationStatusViewState.Disabled)
+    fun checkLocationStatus(locationState: LocationState) {
+        when(locationState) {
+            LocationState.DISABLED -> _locationStatusViewState.postValue(LocationStatusViewState.Disabled)
+            LocationState.GET_LOCATION -> _locationStatusViewState.postValue(LocationStatusViewState.GetLocation)
+            LocationState.SEARCH_LOCATION -> _locationStatusViewState.postValue(LocationStatusViewState.SearchLocation)
+            else -> Unit
         }
     }
 }
