@@ -14,4 +14,6 @@
     <string name="discover_our_restaurants">Discover our restaurants</string>
     <string name="discover_our_restaurants_message">You cand find our sponsors typing out their names or using your location</string>
     <string name="enable_my_location">Enable my location</string>
+    <string name="obtaining_location_title">We\'re obtaining your location</string>
+    <string name="obtaining_location_message">It could take a few minutes</string>
 </resources>
