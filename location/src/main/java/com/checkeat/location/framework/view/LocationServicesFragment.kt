@@ -3,8 +3,13 @@ package com.checkeat.location.framework.view
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -25,12 +30,12 @@ import com.checkeat.location.framework.viewmodel.LocationViewModel
 import com.checkeat.location.framework.viewmodel.LocationViewState
 import com.checkeat.location.lib.model.Location
 import com.checkeat.location.lib.model.LocationState
+import com.checkeat.location.lib.service.ObtainLastLocationService
+import com.checkeat.location.lib.service.ServiceLocationState
 import com.checkeat.location.util.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
@@ -53,6 +58,17 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
     private lateinit var placesFoundAdapter: PlacesFoundAdapter
     private lateinit var requestAccessFineLocation: PermissionRequester
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var obtainLastLocationService: ObtainLastLocationService? = null
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val obtainLastLocationBinder = service as? ObtainLastLocationService.ObtainLastLocationBinder
+            obtainLastLocationService = obtainLastLocationBinder?.service
+            handleLastLocationResult()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) = Unit
+    }
 
     override fun bindFragmentView(inflater: LayoutInflater, container: ViewGroup?): View {
         locationServicesBinding =
@@ -283,22 +299,41 @@ class LocationServicesFragment : BaseFragment<ScreenState<LocationViewState>>(),
     @SuppressLint("MissingPermission")
     override fun onAgreementAccepted() {
         requestAccessFineLocation.runWithPermission {
-            val priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY
-            val cancellationTokenSource = CancellationTokenSource()
-            fusedLocationClient.getCurrentLocation(priority, cancellationTokenSource.token)
-                .addOnSuccessListener { location ->
+            bindService()
+        }
+    }
+
+    private fun handleLastLocationResult() {
+        obtainLastLocationService?.serviceLocationState?.observe(viewLifecycleOwner) { state ->
+            when(state) {
+                is ServiceLocationState.Success -> {
                     locationViewModel.storeLocation(
                         GeocoderConverter.toCheckEatLocation(
                             requireContext(),
                             Locale.getDefault(),
-                            location
+                            state.location
                         ),
                         LocationState.GET_LOCATION
                     )
+                    unbindService()
                 }
-                .addOnFailureListener { _ ->
+                is ServiceLocationState.Error -> {
                     locationViewModel.storeLocation(null, LocationState.DISABLED)
+                    unbindService()
                 }
+            }
+        }
+    }
+
+    private fun bindService() {
+        Intent(requireContext(), ObtainLastLocationService::class.java).also { intent ->
+            requireActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    private fun unbindService() {
+        Intent(requireContext(), ObtainLastLocationService::class.java).also {
+            requireActivity().unbindService(serviceConnection)
         }
     }
 }
